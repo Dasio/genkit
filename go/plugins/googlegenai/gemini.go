@@ -825,7 +825,9 @@ func translateCandidate(cand *genai.Candidate) *ai.ModelResponse {
 		if partFound > 1 {
 			panic(fmt.Sprintf("expected only 1 content part in response, got %d, part: %#v", partFound, part))
 		}
-
+		if p == nil {
+			continue
+		}
 		msg.Content = append(msg.Content, p)
 	}
 	m.Message = msg
@@ -862,6 +864,9 @@ func toGeminiParts(parts []*ai.Part) ([]*genai.Part, error) {
 		part, err := toGeminiPart(p)
 		if err != nil {
 			return nil, err
+		}
+		if part == nil {
+			continue
 		}
 		res = append(res, part)
 	}
@@ -916,7 +921,7 @@ func toGeminiPart(p *ai.Part) (*genai.Part, error) {
 		fc := genai.NewPartFromFunctionCall(toolReq.Name, input)
 		return fc, nil
 	default:
-		panic("unknown part type in a request")
+		return nil, nil
 	}
 }
 
